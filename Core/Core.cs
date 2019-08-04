@@ -16,33 +16,6 @@ namespace MGOAP
         public override string ToString() => GetType().Name;
     }
 
-    /// <summary>An Idea is a <see cref="Condition"/> that we want or expect to have a specific outcome.</summary>
-    public class Idea
-    {
-        private Condition condition;
-        private bool expectedState;
-
-        public Idea(Condition condition, bool state)
-        {
-            this.condition = condition;
-            expectedState = state;
-        }
-
-        /// <summary>Does our expectedState match the state of our condition?</summary>
-        public bool Evaluate() => condition.Evaluate() == expectedState ? true : false;
-
-
-        /// <summary>Name of the condition + the expected state it should evaluate to.</summary>
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.Append(condition.GetType().Name);
-            builder.Append(": ");
-            builder.Append(expectedState);
-            return builder.ToString();
-        }
-    }
-
     /// <summary>A Plan is a series of actions that can be followed to attempt to accomplish a goal.</summary>
     public struct Plan
     {
@@ -73,12 +46,12 @@ namespace MGOAP
     /// <summary>A Goal is a number of requirements that need to be fufilled in order to be completed.</summary>
     public class Goal
     {
-        public Idea[] Requirements { get; private set; }
+        public Condition[] Requirements { get; private set; }
 
-        public Goal(Idea[] requirements) => Requirements = requirements;
-        public Goal(Idea requirement)
+        public Goal(Condition[] requirements) => Requirements = requirements;
+        public Goal(Condition requirement)
         {
-            Requirements = new Idea[] { requirement };
+            Requirements = new Condition[] { requirement };
         }
 
         /// <summary>Determine if this goal is accomplished.</summary>
@@ -97,6 +70,7 @@ namespace MGOAP
             var builder = new StringBuilder();
             builder.Append(GetType().Name);
             builder.Append("");
+            return builder.ToString();
         }
     }
 }

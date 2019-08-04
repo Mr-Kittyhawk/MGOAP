@@ -2,19 +2,13 @@ using System.Collections.Generic;
 
 namespace MGOAP
 {
-    class Agent
+    public sealed class Agent
     {
-        public enum Status
+        public List<Action> ActionPool
         {
-            DeterminingMotivation,
-            DeterminingPlan,
-            Moving,
-            PreformingAction
-        };
-
-        public Status State { get; private set; }
-
-        public List<Action> ActionPool { get; set; }
+            get => planner.PotentialActionPool;
+            set => planner.PotentialActionPool = value;
+        }
 
         public List<Motivator> MotivatorPool { get; set; }
 
@@ -25,37 +19,47 @@ namespace MGOAP
         
         public Agent()
         {
-            ActionPool = new List<Action>();
+            planner = new Planner(new List<Action>());
             MotivatorPool = new List<Motivator>();
+        }
 
-            planner = new Planner(ActionPool);
+        public Agent(List<Action> actions, List<Motivator> motivations)
+        {
+            planner = new Planner(actions);
+            MotivatorPool = motivations;
+        }
 
+        public void Start()
+        {
             DetermineGoal();
         }
 
-
-        public void Tick()
+        public void Stop()
         {
 
         }
 
-        #region AgentStateMachine
-        void DetermineGoal()
+        public void DetermineGoal()
         {
-            State = Status.DeterminingMotivation;
-
             //determine which motivation has the highest priority
+            var priorityMotivator = MotivatorPool[0];
+            var highestpriority = priorityMotivator.GetPriority();
+            for (int i = 1; i< MotivatorPool.Count; i++)
+            {
+                if(MotivatorPool[i].GetPriority() > highestpriority)
+                {
+                    priorityMotivator = MotivatorPool[i];
+                    highestpriority = priorityMotivator.GetPriority();
+                }
+            }
 
-            //let motivation evaluate its top goal
-
-            //FormPlan(goal);
+            Goal = priorityMotivator.GetGoal();
+            DeterminePlan();
         }
 
-        void FormPlan(Goal goal)
+        public void DeterminePlan()
         {
-            State = Status.DeterminingPlan;
-
-            Plan = planner.FindPlan(goal);
+            Plan = planner.FindPlan(Goal);
 
             //if we're already at the location we need to be to preform an action just do it
             if (Plan.Actions.Peek().InRange())
@@ -66,23 +70,20 @@ namespace MGOAP
 
         void MoveTo()
         {
-            State = Status.Moving;
-            Vector3 target = Plan.Actions.Peek().PreformLocation();
+            //Vector3 target = Plan.Actions.Peek().PreformLocation();
 
-            var path = nav.GetSimplePath(base.Transform.origin, target);
+            //var path = nav.GetSimplePath(base.Transform.origin, target);
 
-            for (int i = 0; i < path.Length; i++)
-            {
+            //for (int i = 0; i < path.Length; i++)
+            //{
 
-            }
+            //}
 
             PreformAction();
         }
 
         void PreformAction()
         {
-            Status = Status.PreformingAction;
-
             Plan.Actions.Pop().PreformAction();
 
             //play the animation for the action if there is one
@@ -94,8 +95,6 @@ namespace MGOAP
                 MoveTo();
             else
                 DetermineGoal();
-
         }
-        #endregion
     }
 }

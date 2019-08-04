@@ -5,56 +5,62 @@ namespace MGOAP
     /// <summary>
     /// An action graph contains all possible <see cref="Plan"/>s that can be used to solve a goal.
     /// </summary>
-    internal class ActionGraph
+    internal sealed class ActionGraph
     {
-        internal List<ActionGraphNode> RootNodes { get; set; }
+        internal List<Node> RootNodes { get; set; }
         internal Action SelectedAction { get; }
 
-        internal ActionGraph()
+        internal ActionGraph(List<Node> rootNodes)
         {
-            RootNodes = new List<ActionGraphNode>();
+            RootNodes = rootNodes;
         }
 
-        internal ActionGraph(List<Action> rootActions)
-        {
-            RootNodes = new List<ActionGraphNode>();
-            foreach (Action action in rootActions)
-                RootNodes.Add(new ActionGraphNode(action));
-        }
-
-        internal void AddNode(ActionGraphNode parent, ActionGraphNode child)
+        internal void AddNode(Node parent, Node child)
         {
             parent.Children.Add(child);
+            child.Parent = parent;
+            child.UpdatePathCost();
         }
 
-        internal void RemoveNode(ActionGraphNode node)
+        internal void RemoveNode(Node node)
         {
-            foreach (ActionGraphNode child in node.Children)
-                child.Parent = null;
+            for (int i = 0; i < node.Children.Count; i++)
+                node.Children[i].Parent = null;
 
             node.Parent.Children.Remove(node);
         }
 
-        internal void Clear()
+        internal class Node
         {
-            RootNodes.Clear();
-        }
-    }
+            internal Node Parent { get; set; }
+            internal List<Node> Children { get; set; }
+            internal Action Action { get; private set; }
 
-    internal class ActionGraphNode
-    {
-        internal ActionGraphNode Parent { get; set; }
-        internal List<ActionGraphNode> Children { get; set; }
-        internal Action Action { get; set; }
-        internal bool IsLeaf { get { return Children.Count == 0 ? true : false; } }
-        internal bool Closed { get; set; } //this is for AStar
+            internal int Cost; // G in the A* algorithm
 
-        internal int Depth
-        {
-            get
+            internal int PathCost; // H in the A* algorithm
+
+            internal Node(Node parent, Action action)
             {
+                Parent = parent;
+                Action = action;
+                Children = new List<Node>();
+                Cost = action.GetCost();
+                UpdatePathCost();
+            }
+
+            internal Node(Action action)
+            {
+                Parent = null;
+                Action = action;
+                Children = new List<Node>();
+                Cost = action.GetCost();
+            }
+
+            internal int GetDepth()
+            {
+                Node selection = this;
                 int depth = 0;
-                ActionGraphNode selection = this;
                 while (selection.Parent != null)
                 {
                     selection = selection.Parent;
@@ -62,31 +68,23 @@ namespace MGOAP
                 }
                 return depth;
             }
-        }
 
-        internal ActionGraphNode Root
-        {
-            get
+            internal void UpdatePathCost()
             {
-                ActionGraphNode selection = this;
-                while (selection.Parent != null)
+                int cost = 0;
+                Node selection = this;
+
+                while(selection.Parent != null)
+                {
+                    cost += selection.Parent.Cost;
                     selection = selection.Parent;
-                return selection;
+                }
+
+                PathCost = cost;
             }
-        }
 
-        internal ActionGraphNode(ActionGraphNode parent, Action action)
-        {
-            Parent = parent;
-            Action = action;
-            Children = new List<ActionGraphNode>();
-        }
-
-        internal ActionGraphNode(Action action)
-        {
-            Parent = null;
-            Action = action;
-            Children = new List<ActionGraphNode>();
+            internal bool IsLeaf() => Children.Count == 0 ? true : false;
+            internal bool IsRoot() => Parent == null ? true : false;
         }
     }
 }
