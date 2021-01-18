@@ -1,11 +1,8 @@
 using System.Collections.Generic;
 
-namespace MGOAP
-{
-    public sealed class Agent
-    {
-        public List<Action> ActionPool
-        {
+namespace MGOAP {
+    public sealed class Agent {
+        public List<Action> ActionPool {
             get => planner.PotentialActionPool;
             set => planner.PotentialActionPool = value;
         }
@@ -16,38 +13,31 @@ namespace MGOAP
         public Plan Plan { get; private set; }
 
         private Planner planner;
-        
-        public Agent()
-        {
+
+        public Agent() {
             planner = new Planner(new List<Action>());
             MotivatorPool = new List<Motivator>();
         }
 
-        public Agent(List<Action> actions, List<Motivator> motivations)
-        {
+        public Agent(List<Action> actions, List<Motivator> motivations) {
             planner = new Planner(actions);
             MotivatorPool = motivations;
         }
 
-        public void Start()
-        {
+        public void Start() {
             DetermineGoal();
         }
 
-        public void Stop()
-        {
+        public void Stop() {
 
         }
 
-        public void DetermineGoal()
-        {
-            //determine which motivation has the highest priority
+        public void DetermineGoal() {
+            // determine which motivation has the highest priority
             var priorityMotivator = MotivatorPool[0];
             var highestpriority = priorityMotivator.GetPriority();
-            for (int i = 1; i< MotivatorPool.Count; i++)
-            {
-                if(MotivatorPool[i].GetPriority() > highestpriority)
-                {
+            for (int i = 1; i < MotivatorPool.Count; i++) {
+                if (MotivatorPool[i].GetPriority() > highestpriority) {
                     priorityMotivator = MotivatorPool[i];
                     highestpriority = priorityMotivator.GetPriority();
                 }
@@ -57,20 +47,18 @@ namespace MGOAP
             DeterminePlan();
         }
 
-        public void DeterminePlan()
-        {
+        public void DeterminePlan() {
             Plan = planner.FindPlan(Goal);
 
-            //if we're already at the location we need to be to preform an action just do it
+            //if we're already at the location we need to be to perform an action just do it
             if (Plan.Actions.Peek().InRange())
-                PreformAction();
+                PerformAction();
             else
                 MoveTo();
         }
 
-        void MoveTo()
-        {
-            //Vector3 target = Plan.Actions.Peek().PreformLocation();
+        void MoveTo() {
+            //Vector3 target = Plan.Actions.Peek().PerformLocation();
 
             //var path = nav.GetSimplePath(base.Transform.origin, target);
 
@@ -79,12 +67,11 @@ namespace MGOAP
 
             //}
 
-            PreformAction();
+            PerformAction();
         }
 
-        void PreformAction()
-        {
-            Plan.Actions.Pop().PreformAction();
+        void PerformAction() {
+            Plan.Actions.Pop().PerformAction();
 
             //play the animation for the action if there is one
 
