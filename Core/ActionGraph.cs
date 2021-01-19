@@ -28,8 +28,8 @@ namespace MGOAP {
             internal List<Node> Children { get; set; }
             internal Action Action { get; private set; }
 
+            
             internal int Cost; // G in A* algorithm
-
             internal int PathCost; // H in A* algorithm
 
             internal Node(Node parent, Action action) {

@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace MGOAP_Test.Conditions
-{
-    public class EnoughWood: MGOAP.Condition
-    {
+namespace MGOAP_Test.Conditions {
+    public class EnoughWood : MGOAP.Condition {
         private int enoughWood;
 
-        public EnoughWood(int howMuch)
-        {
+        public EnoughWood(int howMuch) {
             enoughWood = howMuch;
         }
 
-        public override bool Evaluate()
-        {
+        public override bool Evaluate() {
             if (Stockpile.Wood > enoughWood)
                 return true;
             else

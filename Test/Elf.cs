@@ -24,7 +24,7 @@ namespace MGOAP_Test {
             };
 
             ai = new MGOAP.Agent(actions, motivations);
-
+            ai.Start();
         }
     }
 }

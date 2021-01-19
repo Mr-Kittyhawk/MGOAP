@@ -2,25 +2,26 @@ using StringBuilder = System.Text.StringBuilder;
 
 namespace MGOAP {
 
-    /// <summary> The main building blocks of MGOAP. </summary>
+    /// <summary> A bundle of logic for changing some amount of world state outside of the AI. </summary>
     public abstract class Action {
-        /// <summary> What the <see cref="Planner"/> knows this action should change in world state. </summary>
+
+        /// <summary> <see cref="Condition"/>s that should be set to true by running <see cref="PerformAction"/>. </summary>
         public Condition[] Effects { get; private set; }
 
         /// <summary>
-        /// Conditions that need to be true in order to complete the action. <br/>
+        /// <see cref="Condition"/>s that need to be true in order for <see cref="PerformAction"/> to run sucessfully. <br/>
         /// If these conditions evaluate to false, the <see cref="Planner"/> will try to solve them by adding additional actions to the graph.
         /// </summary>
         public Condition[] Preconditions { get; private set; }
 
         /// <summary>
-        /// Conditions that need to be true in order to complete the action. <br/>
+        /// <see cref="Condition"/>s that need to be true in order for <see cref="PerformAction"/> to run sucessfully. <br/>
         /// The <see cref="Planner"/> will NOT attempt to solve these conditions using additional actions.
         /// </summary>
         public Condition[] ContextualConditions { get; private set; }
 
 
-        #region Constructors
+        #region Construction
         public Action(Condition effect, Condition precondition = null, Condition contextualCondition = null) {
             Effects = new Condition[] { effect };
             Preconditions = new Condition[] { precondition };

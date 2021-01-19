@@ -1,19 +1,20 @@
 using System.Collections.Generic;
 
 namespace MGOAP {
-    public sealed class Agent {
-        public List<Action> ActionPool {
-            get => planner.PotentialActionPool;
-            set => planner.PotentialActionPool = value;
-        }
 
-        public List<Motivator> MotivatorPool { get; set; }
+    /// <summary> An individual AI. </summary>
+    public sealed class Agent {
 
         public Goal Goal { get; private set; }
         public Plan Plan { get; private set; }
 
+        public List<Motivator> MotivatorPool { get; set; }
+        public List<Action> ActionPool { get => planner.PotentialActionPool; set => planner.PotentialActionPool = value; }
+
+
         private Planner planner;
 
+        #region Construction
         public Agent() {
             planner = new Planner(new List<Action>());
             MotivatorPool = new List<Motivator>();
@@ -23,6 +24,7 @@ namespace MGOAP {
             planner = new Planner(actions);
             MotivatorPool = motivations;
         }
+        #endregion Construction
 
         public void Start() {
             DetermineGoal();
@@ -48,7 +50,7 @@ namespace MGOAP {
         }
 
         public void DeterminePlan() {
-            Plan = planner.FindPlan(Goal);
+            Plan = planner.GeneratePlan(Goal);
 
             //if we're already at the location we need to be to perform an action just do it
             if (Plan.Actions.Peek().InRange())

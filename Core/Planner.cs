@@ -2,11 +2,15 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace MGOAP {
-    ///<summary> The planner is responsible for taking in a goal and determing a list of workable actions from it. </summary>
+    ///<summary> The <see cref="Planner"/> is responsible for taking in a <see cref="Goal"/> and creating a workable <see cref="Plan"/> from it. </summary>
     class Planner {
-        public List<Action> PotentialActionPool { get; set; }
 
+        /// <summary> All <see cref="Action"/>s this <see cref="Planner"/> has to work with. </summary>
+        public List<Action> PotentialActionPool { get; set; }
+        /// <summary> <see cref="Action"/>s that have no unfufilled contextual conditions. </summary>
         private List<Action> usableActionPool;
+
+
         private List<ActionGraph> actionGraphs;
         private ActionGraph.Node finalNode;
 
@@ -14,15 +18,17 @@ namespace MGOAP {
         private List<ActionGraph.Node> openNodes;
         private List<ActionGraph.Node> closedNodes;
 
-
+        #region Construction
         public Planner(List<Action> potentialActions) {
             PotentialActionPool = potentialActions;
             actionGraphs = new List<ActionGraph>();
             openNodes = new List<ActionGraph.Node>();
             closedNodes = new List<ActionGraph.Node>();
         }
+        #endregion Construction
 
-        public Plan FindPlan(Goal goal) {
+        /// <summary> Determines a series of <see cref="Action"/>s that can be used to complete a given <see cref="Goal"/>. </summary>
+        public Plan GeneratePlan(Goal goal) {
             var unsolvedRequirements = new List<Condition>();
 
             // determine what parts of our goal still need solving
@@ -35,14 +41,15 @@ namespace MGOAP {
             if (unsolvedRequirements.Count == 0)
                 return new Plan();
 
-            RemoveActionsWithUnsolvedContextualConditions();
+            DetermineAvailableActions();
 
             ConstructGraphs(unsolvedRequirements);
 
             return SolveGraphs();
         }
 
-        private void RemoveActionsWithUnsolvedContextualConditions() {
+        /// <summary> Fills the <see cref="usableActionPool"/>. </summary>
+        private void DetermineAvailableActions() {
             usableActionPool.Clear();
 
             foreach (var action in PotentialActionPool) {
@@ -60,14 +67,12 @@ namespace MGOAP {
             for (int i = 0; i < requirements.Count; i++) {
                 var rootActions = new List<ActionGraph.Node>();
 
-                // create our 
                 foreach (Action action in usableActionPool) {
                     if (action.Effects.Contains(requirements[i]))
                         rootActions.Add(new ActionGraph.Node(action));
                 }
 
                 var graph = new ActionGraph(rootActions);
-
 
                 foreach (ActionGraph.Node node in graph.RootNodes) {
                     RecursiveGraphBuilder(node);
